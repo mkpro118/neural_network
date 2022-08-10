@@ -1,13 +1,8 @@
 
 # Update Logs
 
-# Change Log (August 9, 2022)
-+ Top Level
-    + Added [`Custom Keras Model Experiment`](https://github.com/mkpro118/neural_network/neural_network/blob/main/Custom%20Keras%20Model%20Experiment.ipynb), experiment had a **26.78%** Accuracy
-    + Added [`Custom Model Experiment`](https://github.com/mkpro118/neural_network/neural_network/blob/main/Custom%20Model%20Experiment.ipynb), experiment had a **83.77%** Accuracy
-    + Added [`Experiment With ResNet50`](https://github.com/mkpro118/neural_network/neural_network/blob/main/Experiment%20WIth%20ResNet50.ipynb), experiment had a **100%** Accuracy
-    + Added [`Experiment with 10 layers`](https://github.com/mkpro118/neural_network/neural_network/blob/main/Experiment%20with%2010%20layers.ipynb), experiment _failed_
-+ Moved change log here
+## Change Log (August 10, 2022)
++ Moved the repo from [CS-539-Project](https://github.com/mkpro118/CS-539-project) to [neural_network](https://github.com/mkpro118/neural_network) (here)
 
 ## Change Log (August 7, 2022)
 + ### Refactored code to be compatible with `python3 version >=3.6`
