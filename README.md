@@ -8,4 +8,4 @@ The source code in this repository is completely free to use for any purposes [w
 If you find any bugs in the software, please open an issue, or report the bug [here](mailto:mkpro118@gmail.com).
 
 
-View the project progress and change log [here](https://github.com/mkpro118/CS-539-project/blob/main/CHANGELOG.md)
+View the project progress and change log [here](https://github.com/mkpro118/neural_network/blob/main/CHANGELOG.md)
