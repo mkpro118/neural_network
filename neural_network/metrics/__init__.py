@@ -23,33 +23,33 @@ Supported metrics are
 # Imports to have functions in the module namespace
 from .accuracy_by_label import (
     accuracy_by_label,
-    __name_to_symbol_map as abl_sym_map,
+    __name_to_symbol_map__ as abl_sym_map,
 )
 
 from .accuracy_score import (
     accuracy_score,
-    __name_to_symbol_map as as_sym_map,
+    __name_to_symbol_map__ as as_sym_map,
 )
 
 from .confusion_matrix import (
     confusion_matrix,
     multilabel_confusion_matrix,
-    __name_to_symbol_map as cm_sym_map,
+    __name_to_symbol_map__ as cm_sym_map,
 )
 
 from .f1_score import (
     f1_score,
-    __name_to_symbol_map as f1_sym_map,
+    __name_to_symbol_map__ as f1_sym_map,
 )
 
 from .precision_score import (
     precision_score,
-    __name_to_symbol_map as ps_sym_map,
+    __name_to_symbol_map__ as ps_sym_map,
 )
 
 from .recall_score import (
     recall_score,
-    __name_to_symbol_map as rs_sym_map,
+    __name_to_symbol_map__ as rs_sym_map,
 )
 
 
