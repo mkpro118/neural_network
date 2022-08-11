@@ -34,7 +34,8 @@ Modules:
 
 Note for those who would like to inspect the source code
     All public classes and function are marked with an `@export`
-    decorator to signify they are
+    decorator to signify they are the ones that users are supposed
+    to use in normal circumstances
 
 This API strictly enforces type hints and safety.
 Type hints are provided for all public functions.
