@@ -37,6 +37,11 @@ from .confusion_matrix import (
     __name_to_symbol_map as cm_sym_map,
 )
 
+from .f1_score import (
+    f1_score,
+    __name_to_symbol_map as f1_sym_map,
+)
+
 from .precision_score import (
     precision_score,
     __name_to_symbol_map as ps_sym_map,
@@ -52,6 +57,7 @@ __name_to_symbol_map__ = {
     **abl_sym_map,
     **as_sym_map,
     **cm_sym_map,
+    **f1_sym_map,
     **ps_sym_map,
     **rs_sym_map,
 }
@@ -59,5 +65,6 @@ __name_to_symbol_map__ = {
 del abl_sym_map
 del as_sym_map
 del cm_sym_map
+del f1_sym_map
 del ps_sym_map
 del rs_sym_map
