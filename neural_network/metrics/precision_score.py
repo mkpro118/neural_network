@@ -89,7 +89,7 @@ def precision_score(y_true: np.ndarray, y_pred: np.ndarray, *,
             giving equal weight to each decision. Tends to be dominated
             by the classifier's performance on the more common labels
 
-            It is computes using the formula
+            It is computed using the formula
                                     Sum of True Positives
             Precision = ----------------------------------------------
                         Sum of True Positives + Sum of False Positives
