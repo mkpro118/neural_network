@@ -24,7 +24,7 @@ class NumpyEncoder(JSONEncoder):
 @mixin  # Prevents instantiation
 class SaveMixin:
     '''
-    Mixin to provide functionality to save data associated to the instance
+    Mixin to save data associated to the instance
 
     Methods:
         `save(filename: str, data: Any) -> None`:
@@ -33,15 +33,16 @@ class SaveMixin:
     @not_none(nullable=('data', 'return'))
     def save(self, filename: str, data: Any = None) -> None:
         '''
-        Save attributes of an instance into a file in json format
+        Save attributes of an instance into a file in json format.
+        Numpy values are automatically encoded into serializable json
 
         Parameters:
             filename: str
                 The name or path of the file to save to
             data: Any, default = None
-                The data to save, if None, `get_metadata` from
-                base.MetadataMixin will be tried. If that too is not found
-                nothing will be saved
+                The data to save, must be JSON serilizable.
+                if None, `get_metadata` from base.MetadataMixin will be
+                tried. If that too is not found nothing will be saved
 
         See:
             `base.metadata_mixin.MetadataMixin`
@@ -53,9 +54,10 @@ class SaveMixin:
                 data = self.get_metadata()
             except AttributeError:
                 # No dice with the MetadataMixin
-                print(
+                raise ValueError(
                     f'There\'s no data to save! '
-                    f'Inherit base.SaveMixin to automatically compute data '
+                    f'Inherit base.metadata_mixin.MetdataMixin to '
+                    f'automatically compute data '
                     f'or pass in data as the second positional argument'
                 )
                 return
