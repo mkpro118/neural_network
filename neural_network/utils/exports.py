@@ -3,7 +3,7 @@ from typing import Callable, Type, Union
 from .typesafety import type_safe
 
 # exports isn't defined yet, so we have to do this manually
-# __all__ = ['export', ]
+__all__ = ['export', ]
 
 
 @type_safe
