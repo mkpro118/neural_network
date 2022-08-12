@@ -16,27 +16,27 @@ If needed, a name to symbol map is provided, accessible by
 
 from .kfold import (
     KFold,
-    __name_to_symbol_map as kf_sym_map,
+    __name_to_symbol_map__ as kf_sym_map,
 )
 
 from .repeated_kfold import (
     RepeatedKFold,
-    __name_to_symbol_map as rkf_sym_map,
+    __name_to_symbol_map__ as rkf_sym_map,
 )
 
 from .stratified_kfold import (
     StratifiedKFold,
-    __name_to_symbol_map as skf_sym_map,
+    __name_to_symbol_map__ as skf_sym_map,
 )
 
 from .stratified_repeated_kfold import (
     StratifiedRepeatedKFold,
-    __name_to_symbol_map as srkf_sym_map,
+    __name_to_symbol_map__ as srkf_sym_map,
 )
 
 from .train_test_split import (
     train_test_split,
-    __name_to_symbol_map as tts_sym_map,
+    __name_to_symbol_map__ as tts_sym_map,
 )
 
 __name_to_symbol_map__ = {
