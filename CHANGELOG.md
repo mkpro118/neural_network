@@ -1,5 +1,7 @@
-
 # Update Logs
+
+## Change Log (August 11, 2022)
++ Added module level docstring to all `__init__.py` files
 
 ## Change Log (August 10, 2022)
 + Moved the repo from [CS-539-Project](https://github.com/mkpro118/CS-539-project) to [neural_network](https://github.com/mkpro118/neural_network) (here)
