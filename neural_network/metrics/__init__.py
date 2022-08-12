@@ -6,7 +6,7 @@ Supported metrics are
                       y_pred: np.ndarray) -> np.ndarray
 
     accuracy_score(y_true: np.ndarray,
-                   y_pred: np.ndarray) -> np.ndarray
+                   y_pred: np.ndarray) -> float
 
     confusion_matrix(y_true: np.ndarray,
                      y_pred: np.ndarray) -> np.ndarray
@@ -15,9 +15,11 @@ Supported metrics are
                                 y_pred: np.ndarray) -> np.ndarray
 
     precision_score(y_true: np.ndarray,
-                    y_pred: np.ndarray) -> np.ndarray
+                    y_pred: np.ndarray) -> np.float
 
-    recall(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray
+    r2_score(y_true: np.ndarray, y_pred: np.ndarray) -> float
+
+    recall(y_true: np.ndarray, y_pred: np.ndarray) -> np.float
 '''
 
 # Imports to have functions in the module namespace
@@ -47,6 +49,11 @@ from .precision_score import (
     __name_to_symbol_map__ as ps_sym_map,
 )
 
+from .r2_score import (
+    r2_score,
+    __name_to_symbol_map__ as r2s_sym_map,
+)
+
 from .recall_score import (
     recall_score,
     __name_to_symbol_map__ as rs_sym_map,
@@ -59,6 +66,7 @@ __name_to_symbol_map__ = {
     **cm_sym_map,
     **f1_sym_map,
     **ps_sym_map,
+    **r2s_sym_map,
     **rs_sym_map,
 }
 
@@ -67,4 +75,5 @@ del as_sym_map
 del cm_sym_map
 del f1_sym_map
 del ps_sym_map
+del r2s_sym_map
 del rs_sym_map
