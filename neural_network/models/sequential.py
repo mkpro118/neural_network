@@ -1,6 +1,7 @@
 from typing import Union
 from numbers import Integral
 import numpy as np
+import sys
 
 from ..base.cost_mixin import CostMixin
 from ..base.classifier_mixin import ClassifierMixin
@@ -11,6 +12,7 @@ from ..layers import __name_to_symbol_map__
 from ..utils.typesafety import type_safe, not_none
 from ..utils.exports import export
 from ..utils.timeit import timeit
+from ..utils.print_utils import ProgressBar
 
 errors = {
     'SequentialModelError': ExceptionFactory.register('SequentialModelError'),
@@ -23,6 +25,9 @@ known_layers = {
 
 @export
 class Sequential(Model, ClassifierMixin):
+
+    STEP_PREFIX = '  Step'
+
     @type_safe
     def __init__(self, *, layers: Union[list, tuple] = None, from_model: 'Sequential' = None,
                  num_checkpoints: int = 5, name: str = None):
@@ -89,20 +94,31 @@ class Sequential(Model, ClassifierMixin):
                 continue
 
             self.final_activation = layer.activation
-
             break
 
-        if (self.final_activation.name == 'softmax' and self.cost.name != 'crossentropy'
-        ) or (
-            self.final_activation.name != 'softmax' and self.cost.name == 'crossentropy'
-        ):
+        self._check_final_layer_compatibility()
+
+        self.num_layers = len(self.layers)
+
+        self.built = True
+
+    def _check_final_layer_compatibility(self):
+        predicate = any((
+            all((
+                self.final_activation.name == 'softmax',
+                self.cost.name != 'crossentropy'
+            )),
+            all((
+                self.final_activation.name != 'softmax',
+                self.cost.name == 'crossentropy'
+            )),
+        ))
+        if predicate:
             raise errors['SequentialModelError'](
-                f'Final layer activation and cost function are not compatible. '
+                f'Final layer activation and cost function are not supported. '
                 f'If the final layer uses \'softmax\', use the \'crossentropy\' cost. '
                 f'For any other final layer activation use \'mse\''
             )
-
-        self.built = True
 
     @type_safe
     @not_none
@@ -110,10 +126,8 @@ class Sequential(Model, ClassifierMixin):
         trainable_params = sum((layer.trainable_params for layer in self.layers))
         non_trainable_params = sum((layer.non_trainable_params for layer in self.layers))
 
-        num_layers = len(self.layers)
-
         s = (
-            f'Sequential Model: \'{self.name}\' with {num_layers} layers\n'
+            f'Sequential Model: \'{self.name}\' with {self.num_layers} layers\n'
             f'{self}\n'
             f'Total Trainable Params = {trainable_params:,}\n'
             f'Total Non-Trainable Params = {non_trainable_params:,}'
@@ -143,6 +157,20 @@ class Sequential(Model, ClassifierMixin):
             raise errors['SequentialModelError'](
                 f'Training labels must be a 1 or 2 dimensional array'
             )
+
+        if y.ndim == 1:
+            self.model_type = 'regressor'
+        else:
+            self.model_type = 'classifier'
+
+        if verbose:
+            self._dynamic_display = any((
+                all((
+                    hasattr(sys.stdout, 'isatty'),
+                    sys.stdout.isatty()
+                )),
+                'ipykernel' in sys.modules,
+            ))
 
         trainer = self._train(X, y, validation_data, epochs, batch_size, steps_per_epoch, shuffle)
 
@@ -180,12 +208,12 @@ class Sequential(Model, ClassifierMixin):
 
                 if time > 60:
                     mins, secs = divmod(time, 60)
-                    print(f'Time taken: {int(mins)}m {secs:05.2f}s', end='\t')
+                    print(f'Time taken: {int(mins)}m {secs:05.2f}s', end=' ')
                 elif time > 1:
-                    print(f'Time taken: {time:05.3f}s', end='\t')
+                    print(f'Time taken: {time:5.3f}s', end=' ')
                 else:
-                    ms = time * 1000
-                    print(f'Time taken: {ms:07.3f}ms', end='\t')
+                    ms = int(time * 1000)
+                    print(f'Time taken: {ms:3d}ms', end=' ')
 
                 time = timeit.get_recent_execution_times('run_batch', steps_per_epoch)
 
@@ -193,12 +221,12 @@ class Sequential(Model, ClassifierMixin):
 
                 if time > 60:
                     mins, secs = divmod(time, 60)
-                    print(f'[avg {int(mins)}:{secs:05.2f} (mins) / step]')
+                    print(f'[avg {int(mins)}m:{secs:05.2f}s/step]')
                 elif time > 1:
-                    print(f'[avg {time:05.3f}s/step]')
+                    print(f'[avg {time:5.3f}s/step]')
                 else:
                     ms = time * 1000
-                    print(f'[avg {ms:07.3f}ms/step]')
+                    print(f'[avg {ms:3.2f}ms/step]')
 
             if validation_data:
                 targets = validation_data[1]
@@ -211,19 +239,28 @@ class Sequential(Model, ClassifierMixin):
 
                 error = np.around(error, 4)
 
-                if y.ndim == 2:
+                if self.model_type == 'classifier':
                     predictions = (predictions == predictions.max(axis=1)[:, None]).astype(int)
+                elif self.model_type == 'regressor':
+                    predictions = predictions.flatten()
 
                 metrics = {}
 
                 for metric in self.metrics:
                     acc = metric(targets, predictions)
-                    self.history['validation'][f'{metric.__name__}'].append(acc)
+                    self.history['validation'][f'{metric.__name__ if metric.__name__ not in ("accuracy_score", "r2_score") else "accuracy"}'].append(acc)
                     metrics[f'{metric.__name__}'] = np.around(acc, 4)
 
                 if self.verbose:
                     print(f'  Validation loss: {error}', end=' ')
-                    print(' | '.join(map(lambda x: f'{x[0]}: {x[1]}', metrics.items())))
+                    print(
+                        ' | '.join(
+                            map(
+                                lambda x: f'{"accuracy" if x[0] in ["accuracy_score", "r2_score"] else x[0]}: {x[1]}',
+                                metrics.items()
+                            )
+                        )
+                    )
 
             targets = y
 
@@ -235,21 +272,30 @@ class Sequential(Model, ClassifierMixin):
 
             error = np.around(error, 4)
 
-            if y.ndim == 2:
+            if self.model_type == 'classifier':
                 predictions = (predictions == predictions.max(axis=1)[:, None]).astype(int)
+            elif self.model_type == 'regressor':
+                predictions = predictions.flatten()
 
             metrics = {}
 
             for metric in self.metrics:
                 acc = metric(targets, predictions)
-                self.history['overall'][f'{metric.__name__}'].append(acc)
+                self.history['overall'][f'{metric.__name__ if metric.__name__ not in ("accuracy_score", "r2_score") else "accuracy"}'].append(acc)
                 metrics[f'{metric.__name__}'] = np.around(acc, 4)
 
             if self.verbose:
                 print(f'  Overall loss: {error}', end=' ')
-                print(' | '.join(map(lambda x: f'{x[0]}: {x[1]}', metrics.items())))
+                print(
+                    ' | '.join(
+                        map(
+                            lambda x: f'{"accuracy" if x[0] in ["accuracy_score", "r2_score"] else x[0]}: {x[1]}',
+                            metrics.items()
+                        )
+                    )
+                )
 
-            acc = self.history['overall']['accuracy_score'][-1]
+            acc = self.history['overall']['accuracy'][-1]
 
             if not self.checkpoints:
                 self.checkpoints.append((
@@ -275,7 +321,7 @@ class Sequential(Model, ClassifierMixin):
             _data = {
                 'overall': {
                     'loss': self.history['overall']['loss'][-1],
-                    'accuracy': self.history['overall']['accuracy_score'][-1],
+                    'accuracy': self.history['overall']['accuracy'][-1],
                 },
             }
 
@@ -283,7 +329,7 @@ class Sequential(Model, ClassifierMixin):
                 _data.update({
                     'validation': {
                         'loss': self.history['validation']['loss'][-1],
-                        'accuracy': self.history['validation']['accuracy_score'][-1],
+                        'accuracy': self.history['validation']['accuracy'][-1],
                     },
                 })
 
@@ -294,66 +340,30 @@ class Sequential(Model, ClassifierMixin):
     def _run_epoch(self, X, y, batch_size, steps_per_epoch, shuffle):
         batches = self._get_batches(X, y, batch_size, shuffle)
 
-        for step, (X, y) in zip(range(steps_per_epoch), batches):
-            if self.verbose:
-                print(f'  Step {step + 1: >{len(str(steps_per_epoch))}}/{steps_per_epoch}', end=' .')
-
-            forward_prop, back_prop = self._run_batch(X, y)
-
-            if self.verbose:
-                print('Done.', end='\t\t')
-
-                time = timeit.get_recent_execution_times('run_batch')
-                if time > 60:
-                    mins, secs = divmod(time, 60)
-                    print(f'Time taken: {int(mins)}m {secs:05.2f}s', end=' ')
-                elif time > 1:
-                    print(f'Time taken: {time:05.3f}s', end=' ')
-                else:
-                    ms = time * 1000
-                    print(f'Time taken: {ms:07.3f}ms', end=' ')
-
-                time = forward_prop
-                if time > 60:
-                    mins, secs = divmod(time, 60)
-                    print(f'[forward: {int(mins)}m {secs:05.2f}s', end=', ')
-                elif time > 1:
-                    print(f'[forward: {time:05.3f}s', end=', ')
-                else:
-                    ms = time * 1000
-                    print(f'[forward: {ms:07.3f}ms', end=', ')
-
-                time = back_prop
-                if time > 60:
-                    mins, secs = divmod(time, 60)
-                    print(f'backward: {int(mins)}:{secs:05.2f} mins]')
-                elif time > 1:
-                    print(f'backward: {time:05.3f}s]')
-                else:
-                    ms = time * 1000
-                    print(f'backward: {ms:07.3f}ms]')
+        with ProgressBar(steps_per_epoch, prefix=Sequential.STEP_PREFIX) as pb:
+            for step, (X, y) in zip(range(steps_per_epoch), batches):
+                if self.verbose:
+                    pb.update()
+                self._run_batch(X, y)
 
     @timeit.register('run_batch', 'batch runner')
     def _run_batch(self, X, y):
-        with timeit() as forward_prop:
-            predictions = self.predict(X)
+        predictions = self.predict(X, training=True)
 
-        if self.verbose:
-            print('.', end='')
+        _predictions = predictions
 
-        error_gradient = np.clip(self.cost.derivative(y, predictions) * self.final_activation.derivative(predictions), -1e6, 1e6)
+        if self.model_type == 'regressor':
+            _predictions = predictions.reshape(y.shape)
 
-        with timeit() as back_prop:
-            for layer in reversed(self.layers):
-                error_gradient = np.clip(layer.backward(error_gradient), -1e6, 1e6)
+        error_gradient = np.clip(self.cost.derivative(y, _predictions) * self.final_activation.derivative(_predictions), -1e6, 1e6)
 
-        if self.verbose:
-            print('.', end=' ')
+        error_gradient = error_gradient.reshape(predictions.shape)
 
-        return forward_prop.time, back_prop.time
+        for idx, layer in enumerate(reversed(self.layers)):
+            error_gradient = np.clip(layer.backward(error_gradient), -1e6, 1e6)
 
-    def predict(self, X: np.ndarray, *, classify: bool = False):
-        for layer in self.layers:
+    def predict(self, X: np.ndarray, *, classify: bool = False, training: bool = False):
+        for idx, layer in enumerate(self.layers):
             X = layer.forward(X, is_training=self.is_training)
 
         if classify:
