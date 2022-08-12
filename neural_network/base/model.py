@@ -13,7 +13,9 @@ from ..utils.typesafety import type_safe, not_none
 from ..metrics import (
     accuracy_score,
     accuracy_by_label,
+    f1_score,
     precision_score,
+    r2_score,
     recall_score,
 )
 
@@ -27,10 +29,13 @@ errors = {
 }
 
 known_metrics = {
+    'accuracy': (accuracy_score, r2_score),
     'accuracy_score': accuracy_score,
     'accuracy_by_label': accuracy_by_label,
+    'f1_score': f1_score,
     'precision_score': precision_score,
     'recall_score': recall_score,
+    'r2_score': r2_score,
 }
 
 known_metrics_inv = {v: k for k, v in known_metrics.items()}
@@ -64,6 +69,7 @@ class Model(MetadataMixin, SaveMixin):
         self.best_accuracy = 0.
         self.best_loss = 0.
         self._trainable = True
+        self._attrs = ('cost', 'metrics')
 
     @type_safe
     @not_none(nullable=('metrics',))
@@ -84,15 +90,26 @@ class Model(MetadataMixin, SaveMixin):
         self.metrics_names = []
 
         if not metrics:
-            metrics = ['accuracy_score']
-        else:
-            if 'accuracy_score' not in metrics and accuracy_score not in metrics:
+            if cost is CrossEntropy or isinstance(cost, CrossEntropy):
+                metrics = ['accuracy_score']
+            else:
+                metrics = ['r2_score']
+        elif 'accuracy' not in metrics and accuracy_score not in metrics and r2_score not in metrics:
+            if cost is CrossEntropy or isinstance(cost, CrossEntropy):
                 metrics.append('accuracy_score')
+            else:
+                metrics.append('r2_score')
 
         for metric in metrics:
             if isinstance(metric, str):
                 self.metrics_names.append(metric)
-                metric = known_metrics.get(metric, None)
+                if metric == 'accuracy':
+                    if cost is CrossEntropy or isinstance(cost, CrossEntropy):
+                        metric = known_metrics.get('accuracy_score', None)
+                    else:
+                        metric = known_metrics.get('r2_score', None)
+                else:
+                    metric = known_metrics.get(metric, None)
 
                 if metric is None:
                     self.metrics_names.pop()
@@ -101,8 +118,6 @@ class Model(MetadataMixin, SaveMixin):
                         f'{", ".join(known_metrics.keys())}'
                     )
             self.metrics.add(metric)
-
-        self._attrs = ('cost', 'metrics')
 
     @type_safe
     @not_none
