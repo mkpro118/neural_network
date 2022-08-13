@@ -28,6 +28,15 @@ class ConfusionMatrixDisplay:
                 The labels on the confusion matrix
                 If None, will be assigned integers using numpy.arange
                 with the shape inferred from the confusion matrix
+            fig_title: str, keyword only, default = 'Confusion Matrix'
+                Sets a title to the confusion matrix plot. Passed directly to
+                pyplot's `suptitle` method
+            fig_title_fontsize: Union[int, float, tuple], keyword only, default = 18
+                Sets the title fontsize. Passed directly to the `fontsize`
+                parameter in pyplot's `suptitle` function
+            fig_size: tuple, keyword only, default = (8, 8)
+                Sets the size of the plotted figure, passed directly to the
+                `figsize` parameter in pyplot's `subplots` function
             cmap: str, keyword only, default = 'Blues'
                 The color map for the confusion matrix plot. Passed directly
                 to the `cmap` parameter in pyplot's `matshow` function
@@ -73,6 +82,9 @@ class ConfusionMatrixDisplay:
         self.cmat_fontsize = cmat_fontsize
         self.plt_style = plt_style
 
+        if isinstance(self.label_fontsize, (int, float)):
+            self.label_fontsize = (self.label_fontsize,) * 2
+
     def plot_predictions(self, y_true: Union[np.ndarray, tuple, list],
                          y_pred: Union[np.ndarray, tuple, list], *,
                          use_multiprocessing: bool = False):
@@ -109,10 +121,14 @@ class ConfusionMatrixDisplay:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=self.fig_size)
 
         ax.matshow(cmat, cmap='Blues', alpha=0.6)
+
         ax.set_xticks(np.arange(len(self.labels)))
-        ax.set_xticklabels(map(str, self.labels), fontsize=14)
+        ax.set_xticklabels(map(str, self.labels),
+                           fontsize=self.label_fontsize[0])
+
         ax.set_yticks(np.arange(len(self.labels)))
-        ax.set_yticklabels(map(str, self.labels), fontsize=14)
+        ax.set_yticklabels(map(str, self.labels),
+                           fontsize=self.label_fontsize[1])
 
         for i in range(cmat.shape[0]):
             for j in range(cmat.shape[1]):
