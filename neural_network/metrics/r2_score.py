@@ -26,11 +26,17 @@ def r2_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     Returns:
         float: The R2 score
     '''
-    if y_true.ndim > 1 or y_pred.ndim > 1:
+    if y_true.ndim > 2 or y_pred.ndim > 2:
         raise errors['R2ScoreError'](
             f'y_true and y_pred be one dimensional, found '
             f'y_true.shape={y_true.shape}, y_pred.shape={y_pred.shape}'
         )
+
+    if y_true.ndim == 2 and y_true.shape[-1] == 1:
+        y_true = np.reshape(y_true, (-1,))
+
+    if y_pred.ndim == 2 and y_pred.shape[-1] == 1:
+        y_pred = np.reshape(y_pred, (-1,))
 
     if y_true.shape != y_pred.shape:
         raise errors['R2ScoreError'](
