@@ -94,7 +94,7 @@ class Model(MetadataMixin, SaveMixin):
                 metrics = ['accuracy_score']
             else:
                 metrics = ['r2_score']
-        elif 'accuracy' not in metrics and accuracy_score not in metrics and r2_score not in metrics:
+        elif 'accuracy' not in metrics and 'accuracy_score' not in metrics and 'r2_score' not in metrics:
             if cost is CrossEntropy or isinstance(cost, CrossEntropy):
                 metrics.append('accuracy_score')
             else:
