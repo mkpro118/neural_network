@@ -31,7 +31,7 @@ class SaveMixin:
     '''
     @type_safe
     @not_none(nullable=('data', 'return'))
-    def save(self, filename: str, data: Any = None) -> None:
+    def save(self, filename: str, data: Any = None):
         '''
         Save attributes of an instance into a file in json format.
         Numpy values are automatically encoded into serializable json
