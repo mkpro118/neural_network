@@ -123,8 +123,10 @@ class Sequential(Model, ClassifierMixin):
     @type_safe
     @not_none
     def summary(self, return_: bool = False):
-        trainable_params = sum((layer.trainable_params for layer in self.layers))
-        non_trainable_params = sum((layer.non_trainable_params for layer in self.layers))
+        trainable_params = sum(
+            (layer.trainable_params for layer in self.layers))
+        non_trainable_params = sum(
+            (layer.non_trainable_params for layer in self.layers))
 
         s = (
             f'Sequential Model: \'{self.name}\' with {self.num_layers} layers\n'
@@ -158,7 +160,7 @@ class Sequential(Model, ClassifierMixin):
                 f'Training labels must be a 1 or 2 dimensional array'
             )
 
-        if y.ndim == 1:
+        if y.ndim == 1 or (y.ndim == 2 and y.shape[-1] == 1):
             self.model_type = 'regressor'
         else:
             self.model_type = 'classifier'
@@ -172,7 +174,8 @@ class Sequential(Model, ClassifierMixin):
                 'ipykernel' in sys.modules,
             ))
 
-        trainer = self._train(X, y, validation_data, epochs, batch_size, steps_per_epoch, shuffle)
+        trainer = self._train(X, y, validation_data, epochs,
+                              batch_size, steps_per_epoch, shuffle)
 
         if get_trainer:
             return trainer
@@ -215,7 +218,8 @@ class Sequential(Model, ClassifierMixin):
                     ms = int(time * 1000)
                     print(f'Time taken: {ms:3d}ms', end=' ')
 
-                time = timeit.get_recent_execution_times('run_batch', steps_per_epoch)
+                time = timeit.get_recent_execution_times(
+                    'run_batch', steps_per_epoch)
 
                 time = sum(time) / steps_per_epoch
 
@@ -240,7 +244,8 @@ class Sequential(Model, ClassifierMixin):
                 error = np.around(error, 4)
 
                 if self.model_type == 'classifier':
-                    predictions = (predictions == predictions.max(axis=1)[:, None]).astype(int)
+                    predictions = (predictions == predictions.max(
+                        axis=1)[:, None]).astype(int)
                 elif self.model_type == 'regressor':
                     predictions = predictions.flatten()
 
@@ -248,7 +253,8 @@ class Sequential(Model, ClassifierMixin):
 
                 for metric in self.metrics:
                     acc = metric(targets, predictions)
-                    self.history['validation'][f'{metric.__name__ if metric.__name__ not in ("accuracy_score", "r2_score") else "accuracy"}'].append(acc)
+                    self.history['validation'][f'{metric.__name__ if metric.__name__ not in ("accuracy_score", "r2_score") else "accuracy"}'].append(
+                        acc)
                     metrics[f'{metric.__name__}'] = np.around(acc, 4)
 
                 if self.verbose:
@@ -273,7 +279,8 @@ class Sequential(Model, ClassifierMixin):
             error = np.around(error, 4)
 
             if self.model_type == 'classifier':
-                predictions = (predictions == predictions.max(axis=1)[:, None]).astype(int)
+                predictions = (predictions == predictions.max(
+                    axis=1)[:, None]).astype(int)
             elif self.model_type == 'regressor':
                 predictions = predictions.flatten()
 
@@ -281,7 +288,8 @@ class Sequential(Model, ClassifierMixin):
 
             for metric in self.metrics:
                 acc = metric(targets, predictions)
-                self.history['overall'][f'{metric.__name__ if metric.__name__ not in ("accuracy_score", "r2_score") else "accuracy"}'].append(acc)
+                self.history['overall'][f'{metric.__name__ if metric.__name__ not in ("accuracy_score", "r2_score") else "accuracy"}'].append(
+                    acc)
                 metrics[f'{metric.__name__}'] = np.around(acc, 4)
 
             if self.verbose:
@@ -316,7 +324,8 @@ class Sequential(Model, ClassifierMixin):
                     self.checkpoints.sort(key=lambda x: x[idx], reverse=rev)
                 self.checkpoints = self.checkpoints[:self.num_checkpoints]
                 self.best_accuracy = self.checkpoints[0][1]
-                self.best_loss = sorted(self.checkpoints, key=lambda x: x[2])[0][2]
+                self.best_loss = sorted(
+                    self.checkpoints, key=lambda x: x[2])[0][2]
 
             _data = {
                 'overall': {
@@ -355,7 +364,8 @@ class Sequential(Model, ClassifierMixin):
         if self.model_type == 'regressor':
             _predictions = predictions.reshape(y.shape)
 
-        error_gradient = np.clip(self.cost.derivative(y, _predictions) * self.final_activation.derivative(_predictions), -1e6, 1e6)
+        error_gradient = np.clip(self.cost.derivative(
+            y, _predictions) * self.final_activation.derivative(_predictions), -1e6, 1e6)
 
         error_gradient = error_gradient.reshape(predictions.shape)
 
@@ -391,7 +401,8 @@ class Sequential(Model, ClassifierMixin):
         data['layers'] = {}
         for layer in self.layers:
             data['layers'].update({f'layer{layer._id}': layer.get_metadata()})
-            data['layers'][f'layer{layer._id}'].update({'type': layer.__class__.__name__})
+            data['layers'][f'layer{layer._id}'].update(
+                {'type': layer.__class__.__name__})
 
         return data
 
@@ -447,7 +458,8 @@ class Sequential(Model, ClassifierMixin):
                     raise errors['SequentialModelError'](
                         f'config\'s  does not have required key \'{rkey}\''
                     )
-            pos_params = tuple((layer[param] for param in layer_type.pos_params))
+            pos_params = tuple((layer[param]
+                                for param in layer_type.pos_params))
             kw_params = {param: layer[param] for param in layer_type.kw_params}
 
             model.add(layer_type(*pos_params, **kw_params))
@@ -455,7 +467,8 @@ class Sequential(Model, ClassifierMixin):
         model.compile(data['cost'], data['metrics'])
         for layer in model.layers:
             if layer.trainable:
-                layer.weights = np.array(layers[f'layer{layer._id}']['weights'])
+                layer.weights = np.array(
+                    layers[f'layer{layer._id}']['weights'])
                 layer.bias = np.array(layers[f'layer{layer._id}']['bias'])
 
         setattr(model, 'trainable', data['trainable'])
@@ -468,12 +481,13 @@ class Sequential(Model, ClassifierMixin):
             return f'Uncompiled model \'{self.name}\''
         s = f'Input Shape: {tuple(self.layers[0].input_shape)}\n'
 
-        f = lambda x: (
+        def f(x): return (
             max(map(lambda y: len(y[0]), x)),
             max(map(lambda y: len(y[1]), x)),
             max(map(lambda y: len(y[2]), x)),
         )
-        x = tuple(map(lambda x: (f'{x._id}', f'{x.__class__.__name__}', f'{x}'), self.layers))
+        x = tuple(
+            map(lambda x: (f'{x._id}', f'{x.__class__.__name__}', f'{x}'), self.layers))
         l0, l1, l2 = f(x)
 
         def _l1(x):
@@ -486,7 +500,7 @@ class Sequential(Model, ClassifierMixin):
             __ = _ // 2
             return __, __ + (_ & 1)
 
-        f_ = lambda x: (
+        def f_(x): return (
             f'| {" " * (l0 - len(x[0]))}{x[0]} '
             f'| {" " * _l1(len(x[1]))[0]}{x[1]}{" " * _l1(len(x[1]))[1]} '
             f'| {" " * _l2(len(x[2]))[0]}{x[2]}{" " * _l2(len(x[2]))[1]} |'
