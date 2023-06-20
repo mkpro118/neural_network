@@ -52,7 +52,6 @@ class KFold(MetadataMixin, SaveMixin):
             for the training set, the second array is the indices for the validating set
         '''
         n_samples = len(X)
-        X = np.asarray(X)
 
         indices = np.arange(n_samples)
         if self.shuffle:
