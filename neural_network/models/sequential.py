@@ -129,10 +129,11 @@ class Sequential(Model, ClassifierMixin):
             (layer.non_trainable_params for layer in self.layers))
 
         s = (
-            f'Sequential Model: \'{self.name}\' with {self.num_layers} layers\n'
+            f'\n\nSequential Model: \'{self.name}\' with '
+            f'{self.num_layers} layer{"s" if self.num_layers != 1 else ""}\n'
             f'{self}\n'
             f'Total Trainable Params = {trainable_params:,}\n'
-            f'Total Non-Trainable Params = {non_trainable_params:,}'
+            f'Total Non-Trainable Params = {non_trainable_params:,}\n\n'
         )
 
         if return_:
@@ -235,7 +236,7 @@ class Sequential(Model, ClassifierMixin):
             if validation_data:
                 targets = validation_data[1]
 
-                predictions = self.predict(validation_data[0])
+                predictions = self.predict(validation_data[0], training=True)
 
                 error = self.cost.apply(targets, predictions)
 
@@ -270,7 +271,7 @@ class Sequential(Model, ClassifierMixin):
 
             targets = y
 
-            predictions = self.predict(X)
+            predictions = self.predict(X, training=True)
 
             error = self.cost.apply(targets, predictions)
 
@@ -374,7 +375,7 @@ class Sequential(Model, ClassifierMixin):
 
     def predict(self, X: np.ndarray, *, classify: bool = False, training: bool = False):
         for idx, layer in enumerate(self.layers):
-            X = layer.forward(X, is_training=self.is_training)
+            X = layer.forward(X, is_training=training)
 
         if classify:
             return (X == X.max(axis=1)[:, None]).astype(int)
