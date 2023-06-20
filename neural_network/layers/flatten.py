@@ -36,7 +36,7 @@ class Flatten(Layer):
         super().__init__(
             trainable=False,
             use_bias=False,
-            name=name
+            name=name or 'Flatten Layer'
         )
 
     @type_safe
@@ -44,7 +44,6 @@ class Flatten(Layer):
     def build(self, _id: int,
               input_shape: Union[list, tuple, np.ndarray]) -> tuple:
         self._id = _id
-        self.name = self.name or f'Flatten Layer'
         self.input_shape = np.asarray(input_shape)
         self.output_shape = np.prod(self.input_shape, dtype=int)
         self.built = True
