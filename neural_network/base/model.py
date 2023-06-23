@@ -19,7 +19,11 @@ from ..metrics import (
     recall_score,
 )
 
-from ..cost import CrossEntropy, MeanSquaredError
+from ..cost import (
+    BinaryCrossEntropy,
+    CrossEntropy,
+    MeanSquaredError,
+)
 
 errors = {
     'UncompiledModelError': ExceptionFactory.register('UncompiledModelError'),
@@ -41,6 +45,7 @@ known_metrics = {
 known_metrics_inv = {v: k for k, v in known_metrics.items()}
 
 known_costs = {
+    'binarycrossentropy': BinaryCrossEntropy,
     'crossentropy': CrossEntropy,
     'mse': MeanSquaredError,
 }

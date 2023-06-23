@@ -17,6 +17,11 @@ API, however, if needed, a name to symbol map is provided, accessible by
 '''
 
 # Imports to have classes in the module namespace
+from .binary_cross_entropy import (
+    BinaryCrossEntropy,
+    __name_to_symbol_map__ as binary_cross_entropy_symbol_map,
+)
+
 from .cross_entropy import (
     CrossEntropy,
     __name_to_symbol_map__ as cross_entropy_symbol_map,
@@ -28,6 +33,7 @@ from .mean_squared_error import (
 )
 
 __name_to_symbol_map__ = {
+    **binary_cross_entropy_symbol_map,
     **cross_entropy_symbol_map,
     **mse_symbol_map,
 }
