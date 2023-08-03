@@ -7,19 +7,21 @@ class ProgressBar:
     BACKSPACE = '\b'
 
     @type_safe
-    def __init__(self, n_steps, prefix="", size=20, out=sys.stdout, dynamic_display: bool = True):
+    def __init__(self, n_steps, prefix="", size=20, out=sys.stdout, dynamic_display: bool = True, verbose: bool = True):
         self.n_steps = n_steps
         self.prefix = prefix
         self.size = size
         self.out = out
         self.dynamic_display = dynamic_display
+        self.verbose = verbose
 
     def __enter__(self):
         self.curr = 1
         return self
 
     def __exit__(self, *args):
-        print("\n", flush=True, file=self.out)
+        if self.verbose:
+            print("\n", flush=True, file=self.out)
 
     def update(self):
         ProgressBar.show(

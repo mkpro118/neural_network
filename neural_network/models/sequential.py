@@ -350,7 +350,7 @@ class Sequential(Model, ClassifierMixin):
     def _run_epoch(self, X, y, batch_size, steps_per_epoch, shuffle):
         batches = self._get_batches(X, y, batch_size, shuffle)
 
-        with ProgressBar(steps_per_epoch, prefix=Sequential.STEP_PREFIX) as pb:
+        with ProgressBar(steps_per_epoch, prefix=Sequential.STEP_PREFIX, verbose=self.verbose) as pb:
             for step, (X, y) in zip(range(steps_per_epoch), batches):
                 if self.verbose:
                     pb.update()
