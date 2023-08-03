@@ -46,8 +46,11 @@ class Scaler(MetadataMixin, SaveMixin, TransformMixin):
         self.feature_min = np.min(X, axis=0)
         self.feature_max = np.max(X, axis=0)
 
-        # Compute the feature range (add a small epsilon to avoid division by zero)
-        self.feature_range = self.feature_max - self.feature_min + Scaler.EPSILON
+        # Compute the feature range
+        self.feature_range = self.feature_max - self.feature_min
+
+        # Add a small epsilon to avoid division by zero
+        self.feature_range[self.feature_range == 0] += Scaler.EPSILON
 
         # Compute the required range
         self.range = self.end - self.start
