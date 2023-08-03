@@ -1,5 +1,7 @@
 from scipy.special import expit
 import numpy as np
+from numbers import Number
+from typing import Union
 
 from ..utils.typesafety import type_safe, not_none
 from ..utils.exports import export
@@ -23,7 +25,7 @@ class Sigmoid(ActivationMixin):
     @staticmethod
     @type_safe
     @not_none
-    def apply(X: np.ndarray) -> np.ndarray:
+    def apply(X: np.ndarray) -> Union[np.ndarray, np.number, Number]:
         '''
         Apply the Sigmoid activation function on X
 
@@ -39,7 +41,7 @@ class Sigmoid(ActivationMixin):
     @staticmethod
     @type_safe
     @not_none
-    def derivative(X: np.ndarray) -> np.ndarray:
+    def derivative(X: np.ndarray) -> Union[np.ndarray, np.number, Number]:
         '''
         Compute the derivative of Sigmoid for each value in X
 

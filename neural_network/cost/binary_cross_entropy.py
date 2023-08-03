@@ -46,7 +46,7 @@ class BinaryCrossEntropy(CostMixin, MetadataMixin, SaveMixin):
     @not_none
     def derivative(
             y_true: np.ndarray,
-            y_pred: np.ndarray) -> np.ndarray:
+            y_pred: np.ndarray) -> Union[np.ndarray, np.number, Number]:
         '''
         Applies the derivative of binary cross entropy loss on the given
         labels and predictions corresponding to the sigmoid function
