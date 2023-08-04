@@ -1,5 +1,5 @@
 from typing import Any
-from json import dumps, JSONEncoder
+from json import dump, JSONEncoder
 import numpy as np
 
 from .mixin import mixin
@@ -62,9 +62,6 @@ class SaveMixin:
                 )
                 return
 
-        # Convert data to json format
-        data_str = dumps(data, indent=4, cls=NumpyEncoder)
-
         # Write to file
         with open(filename, 'w') as f:
-            f.write(data_str)
+            dump(data, f, cls=NumpyEncoder)
