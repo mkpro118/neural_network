@@ -1,5 +1,9 @@
 # Update Logs
 
+## Change Log (August 7, 2023)
++ Module [`tree`](https://github.com/mkpro118/neural_network/tree/main/neural_network/tree) added
+    + Added [`DecisionTreeClassifier`](https://github.com/mkpro118/neural_network/blob/main/neural_network/tree/decision_tree_classifier.py)
+
 ## Change Log (August 11, 2022)
 + Added module level docstring to all `__init__.py` files
 
