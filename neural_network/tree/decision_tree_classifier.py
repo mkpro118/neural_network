@@ -68,7 +68,7 @@ class DecisionTreeClassifier(MetadataMixin, SaveMixin, TransformMixin):
     @type_safe
     @not_none(nullable=('feature_idxs',))
     def fit(self, X: np.ndarray, y: np.ndarray,
-            feature_idxs: Optional[np.ndarray] = None) -> 'DecisionTreeClassifier':
+            feature_idxs: Optional[np.ndarray] = None):
         assert X.ndim == 2, 'X must be of shape (n_samples, n_features)'
 
         y = np.ravel(y)
@@ -257,7 +257,7 @@ class DecisionTreeClassifier(MetadataMixin, SaveMixin, TransformMixin):
         assert node.right, 'Invalid DecisionTreeClassifier!'
         return DecisionTreeClassifier._predict_traverse(node.right, x)
 
-    @type_safe
+    @type_safe(skip=('return', ))
     @not_none
     @staticmethod
     def _split(X: np.ndarray, threshold: Any) -> tuple[np.ndarray, np.ndarray]:
@@ -299,7 +299,7 @@ class DecisionTreeClassifier(MetadataMixin, SaveMixin, TransformMixin):
     @staticmethod
     def entropy(labels: np.ndarray, *,
                 base: Optional[float] = None,
-                mode: Optional[str] = None) -> float:
+                mode: Optional[str] = None) -> float | int:
         assert labels.ndim == 1, 'labels must be of shape (n_samples,)'
 
         if base:
